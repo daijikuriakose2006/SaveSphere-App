@@ -1,0 +1,97 @@
+{% extends "savesphere_app/base.html" %}
+
+{% block title %}{{ media.title }} - SaveSphere{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="h4 mb-0">{{ media.title }}</h2>
+                        <div class="btn-group">
+                            {% if media.album %}
+                            <a href="{% url 'savesphere_app:album_detail' media.album.pk %}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left"></i> Back to Album
+                            </a>
+                            {% else %}
+                            <a href="{% url 'savesphere_app:dashboard' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                            {% endif %}
+                            <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body text-center">
+                    {% if media.media_type == 'photo' %}
+                        <img src="{{ media.file.url }}" class="img-fluid rounded" alt="{{ media.title }}">
+                    {% else %}
+                        <video class="img-fluid rounded" controls>
+                            <source src="{{ media.file.url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    {% endif %}
+                    
+                    <div class="mt-4 text-start">
+                        <h5>Description</h5>
+                        <p>{{ media.description|linebreaks }}</p>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <p><strong>Upload Date:</strong> {{ media.created_at|date:"F d, Y" }}</p>
+                                <p><strong>Type:</strong> {{ media.get_media_type_display }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Album:</strong> 
+                                    {% if media.album %}
+                                        <a href="{% url 'savesphere_app:album_detail' media.album.pk %}">{{ media.album.name }}</a>
+                                    {% else %}
+                                        Not in album
+                                    {% endif %}
+                                </p>
+                                <p><strong>Last Modified:</strong> {{ media.updated_at|date:"F d, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this media? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'savesphere_app:media_delete' media.pk %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function confirmDelete() {
+        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
+</script>
+{% endblock %} 

@@ -1,0 +1,90 @@
+{% extends "savesphere_app/base.html" %}
+
+{% block title %}Profile - SaveSphere{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Your Profile</h4>
+                    {% if not edit_mode %}
+                    <a href="?edit=true" class="btn btn-light btn-sm">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                {% if edit_mode %}
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field.errors }}
+                            {% if field.name == 'profile_picture' %}
+                                {% if form.instance.userprofile.profile_picture %}
+                                    <div class="mb-2">
+                                        <img src="{{ form.instance.userprofile.profile_picture.url }}" alt="Current profile picture" class="img-thumbnail" style="max-width: 150px;">
+                                    </div>
+                                {% endif %}
+                                {{ field }}
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                            {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <a href="{% url 'savesphere_app:profile' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="text-center mb-4">
+                        {% if form.instance.userprofile.profile_picture %}
+                            <img src="{{ form.instance.userprofile.profile_picture.url }}" alt="Profile picture" class="rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
+                                <i class="fas fa-user fa-4x text-white"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2">Bio</h5>
+                            <p class="mb-4">{{ form.instance.userprofile.bio|default:"No bio added yet." }}</p>
+                            
+                            <h5 class="border-bottom pb-2">Account Information</h5>
+                            <table class="table">
+                                <tr>
+                                    <th style="width: 150px;">Username:</th>
+                                    <td>{{ form.instance.username }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ form.instance.email|default:"Not provided" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Joined:</th>
+                                    <td>{{ form.instance.date_joined|date:"F j, Y" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

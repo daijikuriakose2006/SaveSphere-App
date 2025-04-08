@@ -1,0 +1,369 @@
+{% extends 'savesphere_app/base.html' %}
+{% load static %}
+
+{% block title %}Content Management - SaveSphere{% endblock %}
+
+{% block extra_css %}
+<style>
+    .content-card {
+        transition: all 0.3s ease;
+    }
+    .content-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .media-thumbnail {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    .album-preview {
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+    }
+    .status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-photo-video"></i> Content Management</h1>
+        <div>
+            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#bulkActionModal">
+                <i class="fas fa-tasks"></i> Bulk Actions
+            </button>
+            <a href="{% url 'savesphere_app:media_upload' %}" class="btn btn-success">
+                <i class="fas fa-upload"></i> Upload Media
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" name="search" placeholder="Search content..."
+                               value="{{ request.GET.search }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="type">
+                        <option value="all" {% if current_type == 'all' %}selected{% endif %}>All Types</option>
+                        <option value="media" {% if current_type == 'media' %}selected{% endif %}>Media</option>
+                        <option value="album" {% if current_type == 'album' %}selected{% endif %}>Album</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="status">
+                        <option value="">All Status</option>
+                        <option value="public">Public</option>
+                        <option value="private">Private</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Content List -->
+    <div class="row">
+        {% for content in contents %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card content-card">
+                    <div class="status-badge badge {% if content.is_public %}bg-success{% else %}bg-warning{% endif %}">
+                        {% if content.is_public %}Public{% else %}Private{% endif %}
+                    </div>
+                    
+                    {% if content.type == 'media' %}
+                        <!-- Media Card -->
+                        {% if content.media_type == 'photo' %}
+                            <img src="{{ content.file.url }}" class="media-thumbnail" alt="{{ content.title }}">
+                        {% else %}
+                            <div class="album-preview">
+                                <i class="fas fa-video fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ content.title }}</h5>
+                            <p class="card-text text-muted">
+                                <small>
+                                    <i class="fas fa-user"></i> {{ content.user.username }} |
+                                    <i class="fas fa-calendar"></i> {{ content.created_at|date:"M d, Y" }}
+                                </small>
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info">
+                                    <i class="fas {% if content.media_type == 'photo' %}fa-image{% else %}fa-video{% endif %}"></i> 
+                                    {{ content.media_type|title }}
+                                </span>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editMediaModal{{ content.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteMediaModal{{ content.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Album Card -->
+                        <div class="album-preview">
+                            <div class="text-center">
+                                <i class="fas fa-folder-open fa-3x text-muted mb-2"></i>
+                                <h5 class="mb-0">{{ content.media_count }} items</h5>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ content.title }}</h5>
+                            <p class="card-text text-muted">
+                                <small>
+                                    <i class="fas fa-user"></i> {{ content.user.username }} |
+                                    <i class="fas fa-calendar"></i> {{ content.created_at|date:"M d, Y" }}
+                                </small>
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info">
+                                    <i class="fas fa-images"></i> {{ content.media_count }} items
+                                </span>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editAlbumModal{{ content.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteAlbumModal{{ content.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Edit Modals -->
+                {% if content.type == 'media' %}
+                    <div class="modal fade" id="editMediaModal{{ content.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Media</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="post" action="{% url 'savesphere_app:edit_media' content.id %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Title</label>
+                                            <input type="text" class="form-control" name="title" value="{{ content.title }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" name="is_public"
+                                                       {% if content.is_public %}checked{% endif %}>
+                                                <label class="form-check-label">Public</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="modal fade" id="editAlbumModal{{ content.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Album</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="post" action="{% url 'savesphere_app:edit_album' content.id %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Title</label>
+                                            <input type="text" class="form-control" name="title" value="{{ content.title }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" name="is_public"
+                                                       {% if content.is_public %}checked{% endif %}>
+                                                <label class="form-check-label">Public</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Delete Modals -->
+                {% if content.type == 'media' %}
+                    <div class="modal fade" id="deleteMediaModal{{ content.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Delete Media</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete "{{ content.title }}"?</p>
+                                    <p class="text-danger">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        This action cannot be undone.
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form method="post" action="{% url 'savesphere_app:delete_media' content.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Delete Media</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="modal fade" id="deleteAlbumModal{{ content.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Delete Album</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete album "{{ content.title }}"?</p>
+                                    <p class="text-danger">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        This action cannot be undone. All media will be removed from this album.
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form method="post" action="{% url 'savesphere_app:delete_album' content.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Delete Album</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No content found.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if current_type != 'all' %}&type={{ current_type }}{% endif %}">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_type != 'all' %}&type={{ current_type }}{% endif %}">Previous</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_type != 'all' %}&type={{ current_type }}{% endif %}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_type != 'all' %}&type={{ current_type }}{% endif %}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Bulk Action Modal -->
+<div class="modal fade" id="bulkActionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'savesphere_app:bulk_content_action' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Action</label>
+                        <select class="form-select" name="action" required>
+                            <option value="">Select Action</option>
+                            <option value="make_public">Make Public</option>
+                            <option value="make_private">Make Private</option>
+                            <option value="delete">Delete</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Apply to</label>
+                        <select class="form-select" name="content_type" required>
+                            <option value="">Select Content Type</option>
+                            <option value="all">All Content</option>
+                            <option value="media">Media Only</option>
+                            <option value="albums">Albums Only</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="confirm" required>
+                            <label class="form-check-label">I understand this action cannot be undone</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Apply Action</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,344 @@
+{% extends "savesphere_app/base.html" %}
+{% load static %}
+
+{% block title %}SaveSphere - Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: #000000;
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+        margin-top: -1.5rem;
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hero-section h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        color: white;
+        font-weight: 300;
+    }
+
+    .hero-section p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        color: white;
+        font-weight: 300;
+    }
+
+    .hero-section .btn-outline-primary {
+        color: white;
+        border-color: white;
+        border-radius: 20px;
+    }
+
+    .hero-section .btn-primary {
+        border-radius: 20px;
+    }
+
+    .hero-section .btn-outline-primary:hover {
+        background-color: white;
+        color: black;
+    }
+
+    .features-section {
+        padding: 80px 0;
+        text-align: center;
+    }
+
+    .feature-card {
+        padding: 30px;
+        margin: 20px 0;
+        border-radius: 10px;
+        transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        color: #007bff;
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .feature-description {
+        color: #6c757d;
+    }
+
+    .cta-buttons .btn {
+        margin: 0 10px;
+        padding: 10px 30px;
+        font-size: 1.1rem;
+    }
+
+    .connect-section {
+        background-color: #f8f9fa;
+        padding: 60px 0;
+        text-align: center;
+    }
+
+    .social-links {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .social-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #333;
+        transition: transform 0.3s;
+    }
+
+    .social-link:hover {
+        transform: translateY(-5px);
+        color: #007bff;
+    }
+
+    .social-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+
+    .social-name {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .github-icon {
+        color: #333;
+    }
+
+    .facebook-icon {
+        color: #1877f2;
+    }
+
+    .linkedin-icon {
+        color: #0077b5;
+    }
+
+    /* Dark mode specific styles */
+    [data-theme="dark"] .card {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+    }
+
+    [data-theme="dark"] .form-control {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    [data-theme="dark"] .form-control:focus {
+        background-color: var(--card-bg);
+        border-color: var(--primary-color);
+        color: var(--text-color);
+    }
+
+    [data-theme="dark"] .form-label {
+        color: var(--text-color);
+    }
+
+    /* Social links styling */
+    .social-link {
+        color: var(--text-color);
+        transition: color 0.3s;
+    }
+
+    .social-link:hover {
+        color: var(--primary-color);
+    }
+
+    /* Feature cards */
+    .card .text-primary {
+        color: var(--primary-color) !important;
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--text-color);
+    }
+
+    /* Lead text */
+    .lead {
+        color: var(--text-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 mb-4">Welcome to SaveSphere</h1>
+                <p class="lead mb-4">Your personal media management solution</p>
+                {% if not user.is_authenticated %}
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-4 gap-3">Login</a>
+                        <a href="{% url 'savesphere_app:register' %}" class="btn btn-outline-primary btn-lg px-4">Register</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<div class="row mb-5" id="features">
+    <div class="col-lg-12 text-center mb-4">
+        <h2>Features</h2>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="fas fa-lock fa-3x mb-3 text-primary"></i>
+                <h3 class="card-title h5">Secure Storage</h3>
+                <p class="card-text">Your files are encrypted and stored securely in our cloud infrastructure.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="fas fa-share-alt fa-3x mb-3 text-primary"></i>
+                <h3 class="card-title h5">Easy Sharing</h3>
+                <p class="card-text">Share your photos and videos with friends and family effortlessly.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="fas fa-mobile-alt fa-3x mb-3 text-primary"></i>
+                <h3 class="card-title h5">Access Anywhere</h3>
+                <p class="card-text">Access your media from any device, anytime, anywhere.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Form Section -->
+<div class="row mb-5" id="contact">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="text-center mb-4">Contact Us</h2>
+                <form action="https://formsubmit.co/savespherehelp@gmail.com" method="POST">
+                    <!-- Honeypot -->
+                    <input type="text" name="_honey" style="display: none;">
+                    <!-- Disable Captcha -->
+                    <input type="hidden" name="_captcha" value="false">
+                    <!-- Success Page -->
+                    <input type="hidden" name="_next" value="{{ request.scheme }}://{{ request.get_host }}{% url 'home' %}">
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Social Links Section -->
+<div class="row text-center" id="connect">
+    <div class="col-lg-12">
+        <h2 class="mb-4">Connect With Us</h2>
+        <div class="d-flex justify-content-center gap-4">
+            <a href="https://github.com/daijikuriakose2006" target="_blank" class="text-decoration-none social-link">
+                <i class="fab fa-github fa-3x"></i>
+                <div class="mt-2">GitHub</div>
+            </a>
+            <a href="https://www.facebook.com/daiji.kuriakose.7" target="_blank" class="text-decoration-none social-link">
+                <i class="fab fa-facebook fa-3x"></i>
+                <div class="mt-2">Facebook</div>
+            </a>
+            <a href="https://www.linkedin.com/in/daiji-kuriakose-2ab2a3328/" target="_blank" class="text-decoration-none social-link">
+                <i class="fab fa-linkedin fa-3x"></i>
+                <div class="mt-2">LinkedIn</div>
+            </a>
+            <a href="mailto:savespherehelp@gmail.com" class="text-decoration-none social-link">
+                <i class="fas fa-envelope fa-3x"></i>
+                <div class="mt-2">Email</div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<section class="faq-section py-5" id="faq">
+    <div class="container">
+        <h2 class="text-center mb-5">Frequently Asked Questions</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                How secure is my media?
+                            </button>
+                        </h3>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                We use industry-standard encryption and security measures to protect your media. Your files are stored securely and can only be accessed by you.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                What file types are supported?
+                            </button>
+                        </h3>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                We support all common image formats (JPG, PNG, GIF) and video formats (MP4, MOV, AVI). You can upload and organize any of these file types.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                Is there a storage limit?
+                            </button>
+                        </h3>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Free accounts come with 5GB of storage. Premium accounts have higher storage limits and additional features.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

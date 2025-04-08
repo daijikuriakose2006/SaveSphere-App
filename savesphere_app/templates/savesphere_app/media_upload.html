@@ -1,0 +1,304 @@
+{% extends "savesphere_app/base.html" %}
+
+{% block title %}Upload Media - SaveSphere{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .preview-container {
+        margin-top: 1rem;
+        text-align: center;
+    }
+    .preview-image {
+        max-width: 300px;
+        max-height: 300px;
+        margin-top: 1rem;
+    }
+    .preview-video {
+        max-width: 300px;
+        margin-top: 1rem;
+    }
+    .favorite-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        margin-top: 1rem;
+    }
+    .favorite-checkbox input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+    .favorite-checkbox label {
+        margin: 0;
+        cursor: pointer;
+    }
+    .favorite-checkbox i {
+        color: #dc3545;
+    }
+    .section-header {
+        background-color: #007bff;
+        color: white;
+        padding: 1rem;
+        border-radius: 5px;
+        margin-bottom: 2rem;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .section-header h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+    .hidden {
+        display: none !important;
+    }
+    .storage-info {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+    .storage-info .progress {
+        height: 1.5rem;
+    }
+    .contact-developer {
+        text-align: center;
+        padding: 1rem;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        margin-top: 1rem;
+    }
+    [data-theme="dark"] .card {
+        background-color: #2d3238;
+        border-color: #404850;
+    }
+
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .form-select {
+        background-color: #1e2124;
+        border-color: #404850;
+        color: #e9ecef;
+    }
+
+    [data-theme="dark"] .form-control:focus,
+    [data-theme="dark"] .form-select:focus {
+        background-color: #2d3238;
+        border-color: #0d6efd;
+        color: #e9ecef;
+    }
+
+    [data-theme="dark"] .form-text {
+        color: #adb5bd;
+    }
+
+    [data-theme="dark"] .form-label {
+        color: #e9ecef;
+    }
+
+    [data-theme="dark"] .form-check-label {
+        color: #e9ecef;
+    }
+
+    [data-theme="dark"] .progress {
+        background-color: #1e2124;
+    }
+
+    [data-theme="dark"] .card-title {
+        color: #e9ecef;
+    }
+
+    [data-theme="dark"] p {
+        color: #e9ecef;
+    }
+
+    /* Additional styles for storage section */
+    .progress {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    [data-theme="dark"] .progress {
+        background-color: #343a40;
+    }
+
+    .progress-bar {
+        font-size: 0.875rem;
+        line-height: 25px;
+    }
+
+    [data-theme="dark"] span {
+        color: #e9ecef;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="section-header">
+        <h1 class="text-center mb-0">Upload Media</h1>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-hdd me-2"></i>
+                <h2 class="h5 mb-0">Storage Usage</h2>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span>Used: {{ storage_used }}MB</span>
+                <span>Quota: {{ storage_quota }}MB</span>
+            </div>
+            <div class="progress" style="height: 25px;">
+                <div class="progress-bar bg-success"
+                     role="progressbar"
+                     style="width: {{ storage_percentage }}%"
+                     aria-valuenow="{{ storage_percentage }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                    {{ storage_percentage }}%
+                </div>
+            </div>
+            <div class="text-end mt-3">
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#increaseStorageModal">
+                    <i class="fas fa-plus-circle"></i> Increase Storage
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Increase Storage Modal -->
+    <div class="modal fade" id="increaseStorageModal" tabindex="-1" aria-labelledby="increaseStorageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="increaseStorageModalLabel">Increase Storage</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>To increase your storage quota, please contact our development team at:</p>
+                    <p class="text-center">
+                        <a href="mailto:savespherehelp@gmail.com" class="text-decoration-none">
+                            <i class="fas fa-envelope me-2"></i>savespherehelp@gmail.com
+                        </a>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="mailto:savespherehelp@gmail.com" class="btn btn-primary">
+                        <i class="fas fa-envelope me-2"></i>Contact Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" class="upload-form">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="album" class="form-label">Album</label>
+                    <select class="form-select" id="album" name="album">
+                        <option value="">No Album (Save to Library)</option>
+                        {% for album in albums %}
+                            <option value="{{ album.id }}">{{ album.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="file" class="form-label">File</label>
+                    <input type="file" class="form-control" id="file" name="file" required>
+                    <div class="form-text">Supported formats: Images (JPG, PNG, GIF) and Videos (MP4, MOV, AVI). Max size: {{ max_file_size }}MB</div>
+                </div>
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="favorite" name="favorite">
+                        <label class="form-check-label" for="favorite">
+                            <i class="fas fa-heart text-danger"></i> Add to Favorites
+                        </label>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const videoPreview = document.getElementById('videoPreview');
+    const mediaTypeSelect = document.getElementById('{{ form.media_type.id_for_label }}');
+    const mediaTypeGroup = document.getElementById('mediaTypeGroup');
+
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            previewContainer.style.display = 'block';
+            mediaTypeGroup.classList.remove('hidden');
+
+            if (file.type.startsWith('image/')) {
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    videoPreview.style.display = 'none';
+                }
+                // Set media type to photo
+                mediaTypeSelect.value = 'photo';
+            } else if (file.type.startsWith('video/')) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                imagePreview.style.display = 'none';
+                // Set media type to video
+                mediaTypeSelect.value = 'video';
+            }
+
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.style.display = 'none';
+            mediaTypeGroup.classList.add('hidden');
+        }
+    });
+
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %} 

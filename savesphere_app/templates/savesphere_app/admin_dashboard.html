@@ -1,0 +1,269 @@
+{% extends 'savesphere_app/base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - SaveSphere{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .stats-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    .stats-icon i {
+        font-size: 1.5rem;
+    }
+    .stats-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0.5rem 0;
+        color: var(--primary-color);
+    }
+    .stats-label {
+        color: var(--secondary-color);
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+    .stats-trend {
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    .stats-trend i {
+        margin-right: 0.25rem;
+    }
+    .quick-action {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.25rem;
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+        color: var(--text-color);
+    }
+    .quick-action:hover {
+        transform: translateX(5px);
+        background: var(--hover-bg);
+        border-color: var(--primary-color);
+    }
+    .quick-action-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-color);
+        color: white;
+    }
+    .storage-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    .storage-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    .progress {
+        height: 10px;
+        border-radius: 5px;
+        background: var(--border-color);
+    }
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--text-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Admin Dashboard</h1>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary">
+                <i class="fas fa-download"></i> Export Data
+            </button>
+            <button class="btn btn-primary">
+                <i class="fas fa-plus"></i> New User
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: rgba(0, 123, 255, 0.1); color: #007bff;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-label">Total Users</div>
+                <div class="stats-value">{{ total_users }}</div>
+                <div class="stats-trend text-success">
+                    <i class="fas fa-arrow-up"></i> 12% from last month
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: rgba(40, 167, 69, 0.1); color: #28a745;">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stats-label">Active Users</div>
+                <div class="stats-value">{{ active_users }}</div>
+                <div class="stats-trend text-success">
+                    <i class="fas fa-arrow-up"></i> 5% from last month
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: rgba(255, 193, 7, 0.1); color: #ffc107;">
+                    <i class="fas fa-images"></i>
+                </div>
+                <div class="stats-label">Total Albums</div>
+                <div class="stats-value">{{ total_albums }}</div>
+                <div class="stats-trend text-warning">
+                    <i class="fas fa-minus"></i> No change
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: rgba(111, 66, 193, 0.1); color: #6f42c1;">
+                    <i class="fas fa-photo-video"></i>
+                </div>
+                <div class="stats-label">Total Media</div>
+                <div class="stats-value">{{ total_media }}</div>
+                <div class="stats-trend text-success">
+                    <i class="fas fa-arrow-up"></i> 8% from last month
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Storage Usage -->
+    <div class="storage-card mb-4">
+        <h2 class="section-title">Storage Overview</h2>
+        <div class="storage-info">
+            <div>
+                <h6 class="mb-1">Total Storage Used</h6>
+                <h4 class="mb-0">{{ storage_used }}</h4>
+            </div>
+            <div>
+                <h6 class="mb-1">Storage Limit</h6>
+                <h4 class="mb-0">5.0 GB</h4>
+            </div>
+            <div>
+                <h6 class="mb-1">Storage Used</h6>
+                <h4 class="mb-0">{{ storage_percentage }}%</h4>
+            </div>
+        </div>
+        <div class="progress">
+            <div class="progress-bar {% if storage_percentage > 90 %}bg-danger{% elif storage_percentage > 70 %}bg-warning{% else %}bg-success{% endif %}"
+                 role="progressbar"
+                 style="width: {{ storage_percentage }}%"
+                 aria-valuenow="{{ storage_percentage }}"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12 col-lg-8">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <a href="{% url 'savesphere_app:user_management' %}" class="quick-action">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">User Management</h5>
+                            <p class="mb-0 text-muted">Manage users and permissions</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-12 col-md-6">
+                    <a href="{% url 'savesphere_app:content_management' %}" class="quick-action">
+                        <div class="quick-action-icon" style="background: #28a745;">
+                            <i class="fas fa-photo-video"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Content Management</h5>
+                            <p class="mb-0 text-muted">Manage media and albums</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-12 col-md-6">
+                    <a href="{% url 'admin:index' %}" class="quick-action">
+                        <div class="quick-action-icon" style="background: #6f42c1;">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Django Admin</h5>
+                            <p class="mb-0 text-muted">Advanced system settings</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-12 col-md-6">
+                    <a href="#" class="quick-action">
+                        <div class="quick-action-icon" style="background: #ffc107;">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Analytics</h5>
+                            <p class="mb-0 text-muted">View system statistics</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <h2 class="section-title">Recent Activities</h2>
+            <div class="card">
+                <div class="list-group list-group-flush">
+                    {% for activity in recent_activities %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ activity.action }}</h6>
+                            <small class="text-muted">{{ activity.timestamp }}</small>
+                        </div>
+                        <p class="mb-1">{{ activity.description }}</p>
+                        <small class="text-muted">By {{ activity.user }}</small>
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item text-center text-muted">
+                        <i class="fas fa-info-circle"></i> No recent activities
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

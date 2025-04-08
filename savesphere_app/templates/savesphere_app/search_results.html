@@ -1,0 +1,121 @@
+{% extends 'savesphere_app/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="search-header mb-4">
+                <h2>Search Results for "{{ query }}"</h2>
+                <form class="search-form" action="{% url 'savesphere_app:search' %}" method="GET">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Search media and albums..." value="{{ query }}">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {% if has_results %}
+                {% if media_results %}
+                    <div class="search-section mb-4">
+                        <h3>Media Results</h3>
+                        <div class="row">
+                            {% for media in media_results %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        {% if media.media_type == 'photo' %}
+                                            <img src="{{ media.file.url }}" class="card-img-top" alt="{{ media.title }}">
+                                        {% else %}
+                                            <video class="card-img-top" controls>
+                                                <source src="{{ media.file.url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ media.title }}</h5>
+                                            <p class="card-text">{{ media.description|truncatechars:100 }}</p>
+                                            <a href="{% url 'savesphere_app:media_detail' media.pk %}" class="btn btn-primary">View Details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if album_results %}
+                    <div class="search-section">
+                        <h3>Album Results</h3>
+                        <div class="row">
+                            {% for album in album_results %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ album.name }}</h5>
+                                            <p class="card-text">{{ album.description|truncatechars:100 }}</p>
+                                            <a href="{% url 'savesphere_app:album_detail' album.pk %}" class="btn btn-primary">View Album</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">
+                    No results found for "{{ query }}". Try different search terms.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .search-header {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .search-form {
+        max-width: 600px;
+        margin: 1rem auto 0;
+    }
+
+    .search-form .input-group {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-form input {
+        border: none;
+        padding: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .search-form button {
+        padding: 0 1.5rem;
+    }
+
+    .search-section {
+        margin-top: 2rem;
+    }
+
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+</style>
+{% endblock %} 

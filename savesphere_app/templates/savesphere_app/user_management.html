@@ -1,0 +1,507 @@
+{% extends 'savesphere_app/base.html' %}
+{% load static %}
+
+{% block title %}User Management - SaveSphere{% endblock %}
+
+{% block extra_css %}
+<style>
+    .user-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .user-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .status-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .search-filter-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        margin-bottom: 2rem;
+    }
+    .search-filter-card .form-control,
+    .search-filter-card .form-select {
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        background: var(--input-bg);
+    }
+    .search-filter-card .input-group-text {
+        border-radius: 0.75rem 0 0 0.75rem;
+        border: 1px solid var(--border-color);
+        background: var(--input-bg);
+    }
+    .user-info {
+        padding: 1.5rem;
+    }
+    .user-avatar {
+        width: 64px;
+        height: 64px;
+        background: var(--primary-color);
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+    .storage-info {
+        padding: 1rem 1.5rem;
+        background: var(--hover-bg);
+        border-top: 1px solid var(--border-color);
+    }
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        background: var(--border-color);
+        overflow: hidden;
+    }
+    .progress-bar {
+        transition: width 0.3s ease;
+    }
+    .user-actions {
+        padding: 1rem 1.5rem;
+        background: var(--card-bg);
+        border-top: 1px solid var(--border-color);
+    }
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border-radius: 0.75rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+    .modal-content {
+        border-radius: 1rem;
+        border: none;
+        background: var(--card-bg);
+    }
+    .modal-header {
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem;
+    }
+    .modal-body {
+        padding: 1.5rem;
+    }
+    .modal-footer {
+        border-top: 1px solid var(--border-color);
+        padding: 1.5rem;
+    }
+    .badge-role {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+    .pagination {
+        gap: 0.5rem;
+    }
+    .pagination .page-link {
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        color: var(--text-color);
+        background: var(--card-bg);
+    }
+    .pagination .page-item.active .page-link {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">User Management</h1>
+        <button class="btn btn-primary btn-action" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fas fa-user-plus me-2"></i> Add New User
+        </button>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="search-filter-card">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" name="search" placeholder="Search by username or email..."
+                               value="{{ request.GET.search }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="status">
+                        <option value="">All Status</option>
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="role">
+                        <option value="">All Roles</option>
+                        <option value="admin" {% if request.GET.role == 'admin' %}selected{% endif %}>Admin</option>
+                        <option value="user" {% if request.GET.role == 'user' %}selected{% endif %}>User</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 btn-action">
+                        <i class="fas fa-filter me-2"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User List -->
+    <div class="row">
+        {% for user in users %}
+        <div class="col-md-6 col-xl-4 mb-4">
+            <div class="user-card">
+                <div class="user-info">
+                    <span class="status-badge {% if user.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                        <i class="fas {% if user.is_active %}fa-check-circle{% else %}fa-times-circle{% endif %} me-1"></i>
+                        {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="user-avatar me-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">{{ user.username }}</h5>
+                            <p class="mb-0 text-muted">{{ user.email }}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge-role {% if user.is_staff %}bg-primary{% else %}bg-info{% endif %}">
+                            <i class="fas {% if user.is_staff %}fa-user-shield{% else %}fa-user{% endif %} me-1"></i>
+                            {% if user.is_staff %}Admin{% else %}User{% endif %}
+                        </span>
+                        <span class="badge-role {% if user.userprofile.is_blocked_upload %}bg-danger{% else %}bg-success{% endif %}">
+                            <i class="fas {% if user.userprofile.is_blocked_upload %}fa-ban{% else %}fa-upload{% endif %} me-1"></i>
+                            {% if user.userprofile.is_blocked_upload %}Upload Blocked{% else %}Can Upload{% endif %}
+                        </span>
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Joined: {{ user.date_joined|date:"M d, Y" }}
+                    </small>
+                </div>
+                
+                <div class="storage-info">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Storage Usage</span>
+                        <span class="fw-medium">
+                            {{ user.userprofile.get_storage_used_mb }}MB / {{ user.userprofile.get_storage_quota_mb }}MB
+                        </span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar {% if user.userprofile.get_storage_percentage > 90 %}bg-danger{% elif user.userprofile.get_storage_percentage > 70 %}bg-warning{% else %}bg-success{% endif %}"
+                             role="progressbar"
+                             style="width: {{ user.userprofile.get_storage_percentage }}%"
+                             aria-valuenow="{{ user.userprofile.get_storage_percentage }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-actions">
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-primary btn-action" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#editUserModal{{ user.id }}">
+                            <i class="fas fa-edit me-2"></i> Edit
+                        </button>
+                        <button class="btn btn-outline-danger btn-action"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteUserModal{{ user.id }}">
+                            <i class="fas fa-trash me-2"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit User Modal -->
+            <div class="modal fade" id="editUserModal{{ user.id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-user-edit me-2"></i>
+                                Edit User: {{ user.username }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form method="post" action="{% url 'savesphere_app:edit_user' user.id %}">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="mb-4">
+                                    <label class="form-label">Username</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                        <input type="text" class="form-control" name="username" value="{{ user.username }}">
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                        <input type="email" class="form-control" name="email" value="{{ user.email }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" name="is_active"
+                                                   id="is_active{{ user.id }}" {% if user.is_active %}checked{% endif %}>
+                                            <label class="form-check-label" for="is_active{{ user.id }}">
+                                                <i class="fas fa-user-check me-2"></i>Active Account
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" name="is_staff"
+                                                   id="is_staff{{ user.id }}" {% if user.is_staff %}checked{% endif %}>
+                                            <label class="form-check-label" for="is_staff{{ user.id }}">
+                                                <i class="fas fa-user-shield me-2"></i>Admin Access
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="form-check form-switch">
+                                        <input type="checkbox" class="form-check-input" name="can_upload"
+                                               id="can_upload{{ user.id }}" {% if not user.userprofile.is_blocked_upload %}checked{% endif %}>
+                                        <label class="form-check-label" for="can_upload{{ user.id }}">
+                                            <i class="fas fa-upload me-2"></i>Allow Upload Access
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Storage Limit</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-hdd"></i>
+                                        </span>
+                                        <input type="number" class="form-control" name="storage_limit" 
+                                               value="{{ user.userprofile.get_storage_quota_mb }}" min="0" step="100">
+                                        <span class="input-group-text">MB</span>
+                                    </div>
+                                    <small class="text-muted mt-2">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Current usage: {{ user.userprofile.get_storage_used_mb }}MB
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary btn-action" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-action">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete User Modal -->
+            <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Delete User
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="text-center mb-4">
+                                <div class="display-1 text-danger mb-4">
+                                    <i class="fas fa-user-times"></i>
+                                </div>
+                                <h4 class="mb-3">Delete User Account</h4>
+                                <p class="mb-0">Are you sure you want to delete user "{{ user.username }}"?</p>
+                                <p class="text-danger mb-0">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary btn-action" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                            <form method="post" action="{% url 'savesphere_app:delete_user' user.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-action">
+                                    <i class="fas fa-trash me-2"></i>Delete User
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle fa-2x me-3"></i>
+                    </div>
+                    <div>
+                        <h4 class="alert-heading mb-1">No Users Found</h4>
+                        <p class="mb-0">No users found matching your search criteria. Try adjusting your filters.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">
+                    <i class="fas fa-chevron-left me-1"></i> Previous
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">
+                    {{ num }}
+                </a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">
+                    Next <i class="fas fa-chevron-right ms-1"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Add New User
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'savesphere_app:add_user' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <label class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" name="is_active" id="new_is_active" checked>
+                                <label class="form-check-label" for="new_is_active">
+                                    <i class="fas fa-user-check me-2"></i>Active Account
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" name="is_staff" id="new_is_staff">
+                                <label class="form-check-label" for="new_is_staff">
+                                    <i class="fas fa-user-shield me-2"></i>Admin Access
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Storage Limit</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-hdd"></i>
+                            </span>
+                            <input type="number" class="form-control" name="storage_limit" 
+                                   value="100" min="0" step="100" required>
+                            <span class="input-group-text">MB</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-action" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-action">
+                        <i class="fas fa-plus me-2"></i>Add User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

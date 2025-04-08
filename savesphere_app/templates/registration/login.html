@@ -1,0 +1,273 @@
+{% extends "savesphere_app/base.html" %}
+{% load static %}
+
+{% block title %}Login - SaveSphere{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        min-height: calc(100vh - 72px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .login-header {
+        text-align: center;
+        padding: 2rem 2rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .login-header .app-logo {
+        width: 60px;
+        height: 60px;
+        background: #007bff;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .login-header .app-logo i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .login-header h1 {
+        font-size: 1.75rem;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-header p {
+        color: #718096;
+        margin-bottom: 0;
+    }
+
+    .login-body {
+        padding: 2rem;
+    }
+
+    .form-floating {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-floating input {
+        border-radius: 10px;
+        height: 56px;
+        border: 2px solid #e2e8f0;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-floating input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+    }
+
+    .form-floating label {
+        padding: 1rem 1.25rem;
+    }
+
+    .btn-login {
+        width: 100%;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.8rem;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-login:hover {
+        background: #0069d9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 105, 217, 0.2);
+    }
+
+    .login-footer {
+        padding: 1.5rem 2rem;
+        text-align: center;
+        background: rgba(247, 250, 252, 0.5);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 15px 15px;
+    }
+
+    .login-footer p {
+        margin-bottom: 0;
+        color: #4a5568;
+    }
+
+    .login-footer a {
+        color: #007bff;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .login-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .alert {
+        display: flex;
+        align-items: center;
+        background-color: #fed7d7;
+        color: #c53030;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert i {
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+    }
+
+    .alert-success {
+        background-color: #c6f6d5;
+        color: #2f855a;
+    }
+
+    [data-theme="dark"] .login-card {
+        background: rgba(26, 32, 44, 0.95);
+    }
+
+    [data-theme="dark"] .login-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme="dark"] .login-header h1 {
+        color: #f7fafc;
+    }
+
+    [data-theme="dark"] .login-header p {
+        color: #a0aec0;
+    }
+
+    [data-theme="dark"] .form-floating input {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #f7fafc;
+    }
+
+    [data-theme="dark"] .form-floating label {
+        color: #a0aec0;
+    }
+
+    [data-theme="dark"] .login-footer {
+        background: rgba(45, 55, 72, 0.5);
+    }
+
+    [data-theme="dark"] .login-footer p {
+        color: #a0aec0;
+    }
+
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Login to SaveSphere</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    <div class="alert alert-info">
+                        {% for message in messages %}
+                        <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <ul class="nav nav-tabs mb-4" id="loginTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="user-tab" data-bs-toggle="tab" data-bs-target="#user" type="button" role="tab">User Login</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab">Admin Login</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="loginTabsContent">
+                        <!-- User Login Tab -->
+                        <div class="tab-pane fade show active" id="user" role="tabpanel">
+                            <form method="post" action="{% url 'savesphere_app:login' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="login_type" value="user">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                    <label class="form-check-label" for="remember">Remember me</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Login</button>
+                            </form>
+                        </div>
+
+                        <!-- Admin Login Tab -->
+                        <div class="tab-pane fade" id="admin" role="tabpanel">
+                            <form method="post" action="{% url 'savesphere_app:login' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="login_type" value="admin">
+                                <div class="mb-3">
+                                    <label for="admin_email" class="form-label">Admin Email</label>
+                                    <input type="email" class="form-control" id="admin_email" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="admin_password" class="form-label">Admin Password</label>
+                                    <input type="password" class="form-control" id="admin_password" name="password" required>
+                                </div>
+                                <button type="submit" class="btn btn-danger w-100">Admin Login</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 text-center">
+                        <a href="{% url 'savesphere_app:password_reset' %}" class="text-decoration-none">Forgot Password?</a>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <p class="mb-0">Don't have an account? <a href="{% url 'savesphere_app:register' %}" class="text-decoration-none">Register here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

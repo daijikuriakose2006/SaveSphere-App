@@ -1,0 +1,286 @@
+{% extends "savesphere_app/base.html" %}
+
+{% block title %}My Favorites - SaveSphere{% endblock %}
+
+{% block extra_css %}
+<style>
+    .section-header {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .section-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+    .section-header p {
+        margin: 10px 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    .favorite-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .favorite-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .favorite-card .media-container {
+        height: 250px;
+        position: relative;
+        overflow: hidden;
+        background-color: #f8f9fa;
+    }
+    .favorite-card .media-container img,
+    .favorite-card .media-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .favorite-card:hover .media-container img,
+    .favorite-card:hover .media-container video {
+        transform: scale(1.1);
+    }
+    .favorite-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .empty-state i {
+        font-size: 4rem;
+        color: #ff6b6b;
+        margin-bottom: 1.5rem;
+        animation: pulse 2s infinite;
+    }
+    .empty-state h3 {
+        color: #343a40;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+    .media-type-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        backdrop-filter: blur(5px);
+        transition: all 0.3s ease;
+    }
+    .favorite-card:hover .media-type-badge {
+        background-color: rgba(0, 0, 0, 0.9);
+    }
+    .card-body {
+        padding: 1.5rem;
+    }
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: #343a40;
+    }
+    .card-text {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    .btn {
+        border-radius: 25px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border: none;
+    }
+    .btn-outline-danger {
+        border-color: #ff6b6b;
+        color: #ff6b6b;
+    }
+    .btn-outline-danger:hover {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+        border-color: transparent;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    .search-bar {
+        margin-bottom: 2rem;
+    }
+
+    .search-form {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .search-form .input-group {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-form input {
+        border: none;
+        padding: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .search-form button {
+        padding: 0 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="search-bar mb-4">
+                <form class="search-form" action="{% url 'savesphere_app:search' %}" method="GET">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Search media and albums...">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="section-header">
+                <h1><i class="fas fa-heart"></i> My Favorites</h1>
+                <p>Your collection of cherished memories</p>
+            </div>
+            
+            {% if favorites %}
+                <div class="row g-4">
+                    {% for favorite in favorites %}
+                        <div class="col-md-4">
+                            <div class="favorite-card card h-100">
+                                <div class="media-container">
+                                    {% if favorite.media.media_type == 'photo' %}
+                                        <img src="{{ favorite.media.file.url }}" alt="{{ favorite.media.title }}" loading="lazy">
+                                        <span class="media-type-badge">
+                                            <i class="fas fa-image"></i> Photo
+                                        </span>
+                                    {% elif favorite.media.media_type == 'video' %}
+                                        <video controls>
+                                            <source src="{{ favorite.media.file.url }}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                        <span class="media-type-badge">
+                                            <i class="fas fa-video"></i> Video
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ favorite.media.title }}</h5>
+                                    <p class="card-text">{{ favorite.media.description|truncatewords:20 }}</p>
+                                    <div class="favorite-actions">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> Added {{ favorite.created_at|date:"M d, Y" }}
+                                        </small>
+                                        <div class="btn-group">
+                                            <a href="{% url 'savesphere_app:media_detail' favorite.media.id %}" class="btn btn-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <button class="btn btn-outline-danger toggle-favorite" data-media-id="{{ favorite.media.id }}">
+                                                <i class="fas fa-heart-broken"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-heart-broken"></i>
+                    <h3>No Favorites Yet</h3>
+                    <p>Start adding your favorite photos and videos to create your personal collection!</p>
+                    <a href="{% url 'savesphere_app:dashboard' %}" class="btn btn-primary">
+                        <i class="fas fa-images"></i> Browse Media
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle favorite toggling with animation
+    document.querySelectorAll('.toggle-favorite').forEach(button => {
+        button.addEventListener('click', function() {
+            const mediaId = this.dataset.mediaId;
+            const card = this.closest('.col-md-4');
+            
+            fetch(`/app/media/${mediaId}/toggle-favorite/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Animate card removal
+                    card.style.transform = 'scale(0.8)';
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.remove();
+                        // Check if there are no more favorites
+                        if (document.querySelectorAll('.favorite-card').length === 0) {
+                            location.reload(); // Reload to show empty state
+                        }
+                    }, 300);
+                }
+            });
+        });
+    });
+
+    // Function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}
+{% endblock %} 

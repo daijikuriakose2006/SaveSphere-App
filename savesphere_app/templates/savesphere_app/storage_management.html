@@ -1,0 +1,91 @@
+{% extends "savesphere_app/base.html" %}
+
+{% block title %}Storage Management - SaveSphere{% endblock %}
+
+{% block extra_css %}
+<style>
+    .storage-card {
+        transition: transform 0.3s;
+    }
+    .storage-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .progress {
+        height: 1.5rem;
+    }
+    .quota-form {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-hdd"></i> Storage Management</h1>
+    </div>
+
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        {% for user in users %}
+        <div class="col-md-6 mb-4">
+            <div class="card storage-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ user.username }}</h5>
+                    <p class="text-muted">{{ user.email }}</p>
+                    
+                    <div class="storage-info mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Storage Used: {{ user.userprofile.get_storage_used_mb }}MB</span>
+                            <span>Quota: {{ user.userprofile.get_storage_quota_mb }}MB</span>
+                        </div>
+                        <div class="progress">
+                            {% with percentage=user.userprofile.get_storage_percentage %}
+                            <div class="progress-bar {% if percentage >= 90 %}bg-danger{% elif percentage >= 70 %}bg-warning{% else %}bg-success{% endif %}"
+                                 role="progressbar"
+                                 style="width: {{ percentage }}%"
+                                 aria-valuenow="{{ percentage }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                                {{ percentage|floatformat:1 }}%
+                            </div>
+                            {% endwith %}
+                        </div>
+                    </div>
+
+                    <form method="post" class="quota-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <div class="input-group">
+                            <input type="number" 
+                                   name="new_quota" 
+                                   class="form-control" 
+                                   value="{{ user.userprofile.get_storage_quota_mb }}"
+                                   min="100"
+                                   step="100"
+                                   required>
+                            <span class="input-group-text">MB</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Quota
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 
