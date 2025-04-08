@@ -1,1 +1,1 @@
-web: gunicorn savesphere.wsgi --log-file - 
+web: gunicorn savesphere_app.wsgi:application --log-file - 

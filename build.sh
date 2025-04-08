@@ -19,3 +19,6 @@ User = get_user_model();
 if not User.objects.filter(email='daijikuriakose50@gmail.com').exists():
     User.objects.create_superuser('daijikuriakose50@gmail.com', 'daijikuriakose50@gmail.com', 'your-password')
 "
+
+# Ensure the correct Python path is set
+export PYTHONPATH=$PYTHONPATH:$(pwd)
