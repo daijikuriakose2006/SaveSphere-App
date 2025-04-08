@@ -22,13 +22,25 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-your-secret-key-here')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['savesphere-app.onrender.com','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['SaveSphere-App.onrender.com','localhost','127.0.0.1']  # Update this in production
+
+# Site URL configuration
+SITE_URL = os.environ.get('SITE_URL', 'https://SaveSphere-App.onrender.com')
+
+# Add CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'https://SaveSphere-App.onrender.com', # Add your custom domain if you have one
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -49,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'savesphere.urls'
@@ -122,7 +135,7 @@ STATICFILES_DIRS = [
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

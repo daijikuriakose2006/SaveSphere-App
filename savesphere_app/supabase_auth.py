@@ -85,29 +85,8 @@ def register_view(request):
                     os.environ.get('SUPABASE_KEY', '')
                 )
                 
-                # Check if user exists in Supabase
-                try:
-                    auth_response = supabase.auth.sign_in_with_password({
-                        "email": email,
-                        "password": password
-                    })
-                    # If sign in succeeds, user exists in Supabase
-                    messages.error(request, "This email is already registered. Please try logging in or use password reset.")
-                    return redirect('savesphere_app:login')
-                except Exception as e:
-                    # User doesn't exist in Supabase, proceed with registration
-                    pass
-                
-                # Clean up any orphaned UserProfile records
-                try:
-                    orphaned_profiles = UserProfile.objects.filter(email=email)
-                    if orphaned_profiles.exists():
-                        orphaned_profiles.delete()
-                except Exception as e:
-                    print(f"Error cleaning up orphaned profiles: {str(e)}")
-                
                 # Create user in Supabase with custom redirect URL
-                redirect_url = request.build_absolute_uri('/app/verify/')
+                redirect_url = f"{settings.SITE_URL}/app/verify/"
                 auth_response = supabase.auth.sign_up({
                     "email": email,
                     "password": password,
@@ -237,7 +216,7 @@ def password_reset_request(request):
             )
             
             # Send password reset email with custom redirect URL
-            redirect_url = request.build_absolute_uri('/app/password-reset/')
+            redirect_url = f"{settings.SITE_URL}/app/password-reset/"
             supabase.auth.reset_password_for_email(email, {
                 'redirectTo': redirect_url
             })
