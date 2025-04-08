@@ -3,7 +3,7 @@
 set -o errexit
 
 # Install Python dependencies
-pip install -r requirements.txt
+pip install -r requirements.txt --no-cache-dir
 
 # Collect static files
 python manage.py collectstatic --noinput
